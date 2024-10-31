@@ -12,7 +12,38 @@
 
 #include "get_next_line.h"
 
-int	ft_strrchr(const char *s, int c)
+void	*ft_calloc(size_t nelem, size_t elsize)
+{
+	char	*ptr;
+	size_t	i;
+
+	i = 0;
+	ptr = malloc(nelem * elsize);
+	if (ptr == NULL)
+		return (NULL);
+	while (i < (nelem * elsize))
+		ptr[i++] = 0;
+	return (ptr);
+}
+
+char	*free_buf(char **str)
+{
+	free(*str);
+	*str = NULL;
+	return (NULL);
+}
+
+size_t	ft_strlen(char *s)
+{
+	size_t	i;
+
+	i = 0;
+	while (s[i] != '\0')
+		i++;
+	return (i);
+}
+
+int	ft_strchr(char *s, int c)
 {
 	size_t	i;
 
@@ -28,49 +59,37 @@ int	ft_strrchr(const char *s, int c)
 	return (0); // No encuentra c
 }
 
-size_t	ft_strlen(const char *s)
+
+char	*ft_strjoin(char *s1, char *s2)
 {
+	char	*strjoin;
 	size_t	i;
+	size_t	j;
 
 	i = 0;
-	while (s[i] != '\0')
-		i++;
-	return (i);
-}
-
-char	*ft_strjoin(char const *s1, char const *s2)
-{
-	char	*ptr;
-	size_t	a2;
-	size_t	a1;
-	int		i;
-
-	i = 0;
-	a2 = ft_strlen(s2);
-	a1 = ft_strlen(s1);
-	ptr = (char *)malloc(a2 + a1 + 1);
-	if (ptr == NULL)
+	if (!s1)
+	{
+		s1 = (char *)malloc(1);
+		s1[0] = '\0';
+	}
+	if (!s1 || !s2)
 		return (NULL);
-	while (s1[i] != '\0')
-	{
-		ptr[i] = s1[i];
-		i++;
-	}
-	while (s2[i - a1] != '\0')
-	{
-		ptr[i] = s2[i - a1];
-		i++;
-	}
-	ptr[i] = '\0';
-	return (ptr);
+	strjoin = (char *)malloc((ft_strlen(s2) + ft_strlen(s1) + 1) * sizeof(char));
+	if (strjoin == NULL)
+		return (NULL);
+	i = -1;
+	j = 0;
+	if (s1)
+		while (s1[++i])
+			strjoin[i] = s1[i];
+	while (s2[j])
+		strjoin[i++] = s2[j++];
+	strjoin[ft_strlen(s1) + ft_strlen(s2)] = '\0';	
+	free(s1);
+	return (strjoin);
 }
 
-char	*free_buf(char **str)
-{
-	free(*str);
-	*str = NULL;
-	return (NULL);
-}
+
 
 char	*pillar_linea(char *memory, int fd)
 {
@@ -78,22 +97,64 @@ char	*pillar_linea(char *memory, int fd)
     int		byte;
 
 	byte = 1;
-	buf = (char *)malloc(BUFFER_SIZE + 1);
+	buf = (char *)ft_calloc(BUFFER_SIZE + 1, sizeof(char));
 	if (!buf)
-		return (free_buf(&buf));
-	while (!ft_strchr(memory, '\n'))
+		return (NULL);
+	while (byte > 0)
 	{
 		byte = read(fd, buf, BUFFER_SIZE);
 		if (byte > 0)
 		{
 			buf[byte] = '\0';
 			memory = ft_strjoin(memory, buf);
+			if (ft_strchr(memory, '\n'))
+			break ;
+		}
+		if (byte  == -1)
+		{
+			free(memory);
+			free(buf);
+			return (NULL);
 		}
 	}
+	
+	
 	free(buf);
-	if (byte  == -1)
-		return (free_buf(&buf));
 	return (memory);
+}
+
+int	contar_elementos(char *memory)
+{
+	int	i;
+
+	i = 0;
+	while (memory[i] != '\0')
+	{
+		if (memory[i] == '\n')
+			return (i);
+		i++;
+	}
+	return (i);
+}
+
+
+char	*dame_linea(char *memory)
+{
+	int	n;
+	char *line;
+
+	if (!memory || memory[0] == '\0')
+		return (NULL);
+	n = contar_elementos(memory);
+	line = (char *)malloc((n + 1) * sizeof(char));
+	if (!line)
+		return (NULL);
+	line  = ft_substr(memory, 0, (size_t)n);
+	if (ft_strchr(memory, '\n'))
+		memory = ft_substr(memory, n, ft_strlen(memory));
+	else
+		free(memory);
+	return (line);
 }
 
 char	*get_next_line(int fd)
@@ -101,9 +162,45 @@ char	*get_next_line(int fd)
 	char	*line;
 	char	*memory;
 
+	memory = NULL;
 	if (fd < 0)
 		return (NULL);
 	if ((memory && !ft_strchr(memory, '\n')) || !memory)
 		memory = pillar_linea(memory, fd);
-	line = dame_linea()
+	line = dame_linea(memory);
+	if (!line)
+		return (free_buf(&memory));
+	return (line);
 }
+/*
+#include <stdio.h>
+#include <fcntl.h>
+
+
+int main(int argc, char **argv)
+{
+    if (argc != 2)
+    {
+        fprintf(stderr, "Uso: %s <nombre_del_archivo>\n", argv[0]);
+        return (1);
+    }
+
+    int fd = open(argv[1], O_RDONLY);
+    if (fd < 0)
+    {
+        perror("Error al abrir el archivo");
+        return (1);
+    }
+
+    char *line;
+    while ((line = get_next_line(fd)) != NULL)
+    {
+        printf("%s", line);
+        free(line); // Liberar la memoria de la línea leída
+    }
+
+    close(fd);
+    return (0);
+}
+
+*/

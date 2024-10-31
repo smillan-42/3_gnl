@@ -21,7 +21,11 @@
 # include <unistd.h>
 # include <limits.h>
 # include <stdio.h>
+# include <stdlib.h>
 
 char	*get_next_line(int fd);
+char	*ft_substr(char  *s, unsigned int start, size_t len);
+void	ft_copy(char *dst,  char *src, size_t start, size_t size);
+size_t	ft_strlen(char *s);
 
 #endif

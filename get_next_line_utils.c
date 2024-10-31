@@ -12,80 +12,34 @@
 
 #include "get_next_line.h"
 
-size_t	encontrar(char const *s, char c, int i, int k)
+void	ft_copy(char *dst, char *src, size_t start, size_t size)
 {
-	size_t	sol;
-
-	sol = 0;
-	while (s[i] != '\0')
-	{
-		while (s[i] == c && s[i] != '\0')
-			i++;
-		while (s[i] != c && s[i] != '\0')
-		{
-			if (k)
-			{
-				k = 0;
-				sol++;
-			}
-			i++;
-		}
-		k = 1;
-	}
-	return (sol);
-}
-
-static void	*free_mem(char **cad, int aux)
-{
-	while (aux >= 0)
-	{
-		free(cad[aux]);
-		aux--;
-	}
-	free(cad);
-	return (NULL);
-}
-
-char	**crear_mini(char const *s, char c, char **cad, int aux)
-{
-	int	i;
-	int	j;
-	int	stat;
+	size_t	i;
 
 	i = 0;
-	while (s[i] != '\0')
+	while (i < size && src[start + i] != '\0')
 	{
-		while (s[i] == c && s[i] != '\0')
-			i++;
-		if (s[i] == '\0')
-			return (cad[aux] = NULL, cad);
-		j = i;
-		while (c != s[i] && s[i] != '\0')
-			i++;
-		cad[aux] = (char *)malloc((i - j + 1) * sizeof(char));
-		if (!cad[aux])
-			return (free_mem(cad, aux));
-		stat = j;
-		while (i > j++)
-			cad[aux][j - stat - 1] = s[j - 1];
-		cad[aux][j - stat - 1] = '\0';
-		aux++;
+		dst[i] = src[i + start];
+		i++;
 	}
-	cad[aux] = NULL;
-	return (cad);
+	dst[size] = '\0';
 }
 
-char	**ft_split(char const *s, char c)
+char	*ft_substr(char *s, unsigned int start, size_t len)
 {
-	char	**cad;
-	size_t	num_cad;
+	size_t	tam;
+	char	*ptr;
 
-	if (!s)
+	tam = ft_strlen(s);
+	if (s == NULL )
 		return (NULL);
-	num_cad = encontrar(s, c, 0, 1) + 1;
-	cad = (char **)malloc(num_cad * sizeof(char *));
-	if (!cad)
+	if (start > tam)
+		len = 0;
+	else if (tam < start + len)
+		len = tam - start;
+	ptr = (char *)malloc(len + 1);
+	if (!ptr)
 		return (NULL);
-	cad = crear_mini(s, c, cad, 0);
-	return (cad);
+	ft_copy(ptr, s, start, len);
+	return (ptr);
 }
