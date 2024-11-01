@@ -1,103 +1,12 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: smillan- <marvin@42.fr>                    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/30 16:49:00 by smillan-          #+#    #+#             */
-/*   Updated: 2024/10/30 16:49:02 by smillan-         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "get_next_line.h"
-
-void	*ft_calloc(size_t nelem, size_t elsize)
-{
-	char	*ptr;
-	size_t	i;
-
-	i = 0;
-	ptr = malloc(nelem * elsize);
-	if (ptr == NULL)
-		return (NULL);
-	while (i < (nelem * elsize))
-		ptr[i++] = 0;
-	return (ptr);
-}
-
-char	*free_buf(char **str)
-{
-	free(*str);
-	*str = NULL;
-	return (NULL);
-}
-
-size_t	ft_strlen(char *s)
-{
-	size_t	i;
-
-	i = 0;
-	while (s[i] != '\0')
-		i++;
-	return (i);
-}
-
-int	ft_strchr(char *s, int c)
-{
-	size_t	i;
-
-	i = ft_strlen(s);
-	while (i > 0)
-	{
-		if (s[i] == (unsigned char)c)
-			return (1); // encuentra c
-		i--;
-	}
-	if (s[0] == (unsigned char)c)
-		return (1);
-	return (0); // No encuentra c
-}
-
-
-char	*ft_strjoin(char *s1, char *s2)
-{
-	char	*strjoin;
-	size_t	i;
-	size_t	j;
-
-	i = 0;
-	if (!s1)
-	{
-		s1 = (char *)malloc(1);
-		s1[0] = '\0';
-	}
-	if (!s1 || !s2)
-		return (NULL);
-	strjoin = (char *)malloc((ft_strlen(s2) + ft_strlen(s1) + 1) * sizeof(char));
-	if (strjoin == NULL)
-		return (NULL);
-	i = -1;
-	j = 0;
-	if (s1)
-		while (s1[++i])
-			strjoin[i] = s1[i];
-	while (s2[j])
-		strjoin[i++] = s2[j++];
-	strjoin[ft_strlen(s1) + ft_strlen(s2)] = '\0';	
-	free(s1);
-	return (strjoin);
-}
-
-
 
 char	*pillar_linea(char *memory, int fd)
 {
 	char	*buf;
-    int		byte;
+	int		byte;
 
 	byte = 1;
-	buf = (char *)ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	buf = (char *)malloc(BUFFER_SIZE + 1);
 	if (!buf)
 		return (NULL);
 	while (byte > 0)
@@ -107,100 +16,56 @@ char	*pillar_linea(char *memory, int fd)
 		{
 			buf[byte] = '\0';
 			memory = ft_strjoin(memory, buf);
-			if (ft_strchr(memory, '\n'))
-			break ;
+			if (ft_strchr(memory, '\n', 0))
+			    break ;
 		}
 		if (byte  == -1)
-		{
-			free(memory);
-			free(buf);
-			return (NULL);
-		}
+            return (free(memory), free(buf), NULL);
 	}
-	
-	
 	free(buf);
 	return (memory);
 }
 
-int	contar_elementos(char *memory)
-{
-	int	i;
-
-	i = 0;
-	while (memory[i] != '\0')
-	{
-		if (memory[i] == '\n')
-			return (i);
-		i++;
-	}
-	return (i);
-}
-
-
 char	*dame_linea(char *memory)
 {
 	int	n;
-	char *line;
+	char	*line;
 
 	if (!memory || memory[0] == '\0')
 		return (NULL);
 	n = contar_elementos(memory);
-	line = (char *)malloc((n + 1) * sizeof(char));
+	line = (char *)malloc((n + 1));
 	if (!line)
 		return (NULL);
-	line  = ft_substr(memory, 0, (size_t)n);
-	if (ft_strchr(memory, '\n'))
-		memory = ft_substr(memory, n, ft_strlen(memory));
-	else
-		free(memory);
+	line  = ft_substr(memory, 0, (size_t)(n+1));
 	return (line);
+}
+
+char	*buena_memoria(char *memory)
+{
+	int	n;
+	char	*new_memory;
+
+	n = contar_elementos(memory);
+	if (!memory || memory[0] == '\0' || memory[n] == '\0')
+		return (NULL);
+	new_memory = ft_substr(memory, n+1, ft_strlen(memory));
+	free(memory);
+	return (new_memory);
 }
 
 char	*get_next_line(int fd)
 {
 	char	*line;
-	char	*memory;
+	static char	*memory;
 
-	memory = NULL;
 	if (fd < 0)
 		return (NULL);
-	if ((memory && !ft_strchr(memory, '\n')) || !memory)
+	if ((memory && !ft_strchr(memory, '\n', 0)) || !memory)
 		memory = pillar_linea(memory, fd);
 	line = dame_linea(memory);
 	if (!line)
-		return (free_buf(&memory));
+		return (free(line), free(memory), NULL);
+	memory = buena_memoria(memory);
 	return (line);
 }
-/*
-#include <stdio.h>
-#include <fcntl.h>
-
-
-int main(int argc, char **argv)
-{
-    if (argc != 2)
-    {
-        fprintf(stderr, "Uso: %s <nombre_del_archivo>\n", argv[0]);
-        return (1);
-    }
-
-    int fd = open(argv[1], O_RDONLY);
-    if (fd < 0)
-    {
-        perror("Error al abrir el archivo");
-        return (1);
-    }
-
-    char *line;
-    while ((line = get_next_line(fd)) != NULL)
-    {
-        printf("%s", line);
-        free(line); // Liberar la memoria de la línea leída
-    }
-
-    close(fd);
-    return (0);
-}
-
-*/

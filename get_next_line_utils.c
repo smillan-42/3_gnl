@@ -1,16 +1,75 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   get_next_line_utils.c                              :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: smillan- <marvin@42.fr>                    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/30 16:49:13 by smillan-          #+#    #+#             */
-/*   Updated: 2024/10/30 16:49:14 by smillan-         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "get_next_line.h"
+
+size_t	ft_strlen(char *s)
+{
+	size_t	i;
+
+	i = 0;
+	while (s[i] != '\0')
+		i++;
+	return (i);
+}
+
+
+char	*ft_strjoin(char *s1, char *s2)
+{
+	char	*strjoin;
+	size_t	i;
+	size_t	j;
+
+	if (!s1)
+	{
+		s1 = (char *)malloc(1);
+		if (!s1 )
+			return (NULL);
+		s1[0] = '\0';
+	}
+	if (!s2)
+		return (NULL);
+	strjoin = (char *)malloc((ft_strlen(s2) + ft_strlen(s1) + 1));
+	if (strjoin == NULL)
+		return (free(s1), NULL);
+	i = -1;
+	j = 0;
+	while (s1[++i])
+		strjoin[i] = s1[i];
+	while (s2[j])
+		strjoin[i++] = s2[j++];
+	strjoin[ft_strlen(s1) + ft_strlen(s2)] = '\0';	
+	return (free(s1), strjoin);
+}
+
+int	ft_strchr(char *s, int c, size_t min)
+{
+	size_t	i;
+
+	i = ft_strlen(s);
+	while (i > min)
+	{
+		if (s[i] == (unsigned char)c)
+			return (1); // encuentra c
+		i--;
+	}
+	if (s[min] == (unsigned char)c)
+		return (1);
+	return (0); // No encuentra c
+}
+
+/*----------------------------------------------------*/
+
+int	contar_elementos(char *memory)
+{
+	int	i;
+
+	i = 0;
+	while (memory[i] != '\0')
+	{
+		if (memory[i] == '\n')
+			return (i);
+		i++;
+	}
+	return (i);
+}
 
 void	ft_copy(char *dst, char *src, size_t start, size_t size)
 {

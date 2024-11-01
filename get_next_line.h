@@ -14,7 +14,7 @@
 # define GET_NEXT_LINE_H
 
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 42
+#  define BUFFER_SIZE 6
 # endif
 
 # include <stdarg.h>
@@ -24,8 +24,12 @@
 # include <stdlib.h>
 
 char	*get_next_line(int fd);
-char	*ft_substr(char  *s, unsigned int start, size_t len);
-void	ft_copy(char *dst,  char *src, size_t start, size_t size);
+char	*pillar_linea(char *memory, int fd);
+char	*dame_linea(char *memory);
+char	*ft_strjoin(char *s1, char *s2);
+int	ft_strchr(char *s, int c, size_t min);
 size_t	ft_strlen(char *s);
+int	contar_elementos(char *memory);
+char	*ft_substr(char *s, unsigned int start, size_t len);
 
 #endif
