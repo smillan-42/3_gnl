@@ -35,7 +35,7 @@ char	*ft_strjoin(char *s1, char *s2)
 		strjoin[i] = s1[i];
 	while (s2[j])
 		strjoin[i++] = s2[j++];
-	strjoin[ft_strlen(s1) + ft_strlen(s2)] = '\0';	
+	strjoin[i] = '\0';	
 	return (free(s1), strjoin);
 }
 

@@ -20,7 +20,7 @@ char	*pillar_linea(char *memory, int fd)
 			    break ;
 		}
 		if (byte  == -1)
-            return (free(memory), free(buf), NULL);
+            return (free(memory), memory = NULL, free(buf), NULL);
 	}
 	free(buf);
 	return (memory);
@@ -34,9 +34,6 @@ char	*dame_linea(char *memory)
 	if (!memory || memory[0] == '\0')
 		return (NULL);
 	n = contar_elementos(memory);
-	line = (char *)malloc((n + 1));
-	if (!line)
-		return (NULL);
 	line  = ft_substr(memory, 0, (size_t)(n+1));
 	return (line);
 }
@@ -48,8 +45,10 @@ char	*buena_memoria(char *memory)
 
 	n = contar_elementos(memory);
 	if (!memory || memory[0] == '\0' || memory[n] == '\0')
-		return (NULL);
+		return (free(memory), memory = NULL, NULL);
 	new_memory = ft_substr(memory, n+1, ft_strlen(memory));
+	if (!new_memory)
+		return (free(memory), memory = NULL, NULL);
 	free(memory);
 	return (new_memory);
 }
@@ -63,9 +62,11 @@ char	*get_next_line(int fd)
 		return (NULL);
 	if ((memory && !ft_strchr(memory, '\n', 0)) || !memory)
 		memory = pillar_linea(memory, fd);
+	if (!memory)
+		return (NULL);
 	line = dame_linea(memory);
 	if (!line)
-		return (free(line), free(memory), NULL);
+		return (free(memory), memory = NULL, NULL);
 	memory = buena_memoria(memory);
 	return (line);
 }
